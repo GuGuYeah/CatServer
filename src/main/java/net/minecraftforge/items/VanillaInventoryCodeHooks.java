@@ -1,6 +1,6 @@
 /*
  * Minecraft Forge
- * Copyright (c) 2016.
+ * Copyright (c) 2016-2020.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,6 +19,7 @@
 
 package net.minecraftforge.items;
 
+import catserver.server.inventory.CatInventoryUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDropper;
 import net.minecraft.block.BlockHopper;
@@ -108,10 +109,10 @@ public class VanillaInventoryCodeHooks
             // CatServer start
             CraftItemStack oitemstack = CraftItemStack.asCraftMirror(stack.copy().splitStack(1));
 
-            InventoryHolder owner = ((TileEntity) destination).getOwner();
+            InventoryHolder owner = CatInventoryUtils.getOwner((TileEntity) destination);
             Inventory destinationInventory = owner != null ? owner.getInventory() : CatCustomInventory.getInventoryFromForge(itemHandler);
             
-            InventoryMoveItemEvent event = new InventoryMoveItemEvent(dropper.getOwner().getInventory(), oitemstack.clone(), destinationInventory, true);
+            InventoryMoveItemEvent event = new InventoryMoveItemEvent(CatInventoryUtils.getBukkitInventory(dropper), oitemstack.clone(), destinationInventory, true);
             if (destinationInventory != null) world.getServer().getPluginManager().callEvent(event);
 
             if (event.isCancelled()) {
@@ -164,10 +165,10 @@ public class VanillaInventoryCodeHooks
                         CraftItemStack remainder = CraftItemStack.asCraftMirror(hopper.decrStackSize(i, hopper.world.spigotConfig.hopperAmount)); // Spigot
 
                         TileEntity te = (TileEntity) destination;
-                        InventoryHolder owner = te.getOwner();
+                        InventoryHolder owner = CatInventoryUtils.getOwner(te);
                         Inventory destinationInventory = owner != null ? owner.getInventory() : CatCustomInventory.getInventoryFromForge(itemHandler);
 
-                        InventoryMoveItemEvent event = new InventoryMoveItemEvent(hopper.getOwner().getInventory(), remainder.clone(), destinationInventory, true);
+                        InventoryMoveItemEvent event = new InventoryMoveItemEvent(CatInventoryUtils.getBukkitInventory(hopper), remainder.clone(), destinationInventory, true);
                         if (destinationInventory != null) hopper.getWorld().getServer().getPluginManager().callEvent(event); //CatServer
 
                         if (event.isCancelled()) {

@@ -1,6 +1,6 @@
 /*
  * Minecraft Forge
- * Copyright (c) 2016.
+ * Copyright (c) 2016-2020.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -89,6 +89,7 @@ public class FMLNetworkHandler
 
     public static void openGui(EntityPlayer entityPlayer, Object mod, int modGuiId, World world, int x, int y, int z)
     {
+        if (catserver.server.CatServer.asyncCatch("open gui", () -> openGui(entityPlayer, mod, modGuiId, world, x, y, z))) return; // CatServer - prevent crash caused by async open gui
         ModContainer mc = FMLCommonHandler.instance().findContainerFor(mod);
         if (entityPlayer instanceof EntityPlayerMP && !(entityPlayer instanceof FakePlayer))
         {

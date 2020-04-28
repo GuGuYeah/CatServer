@@ -1,6 +1,6 @@
 /*
  * Minecraft Forge
- * Copyright (c) 2016.
+ * Copyright (c) 2016-2020.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -59,6 +59,7 @@ public class ChunkIOExecutor
     //Load the chunk completely in this thread. Dequeue as needed...
     public static Chunk syncChunkLoad(World world, AnvilChunkLoader loader, ChunkProviderServer provider, int x, int z)
     {
+        org.spigotmc.AsyncCatcher.catchOp("chunk load"); // CatServer
         QueuedChunk key = new QueuedChunk(x, z, world);
         ChunkIOProvider task = tasks.remove(key); // Remove task because we will call the sync callbacks directly
         if (task != null)

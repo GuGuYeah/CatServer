@@ -1,6 +1,6 @@
 /*
  * Minecraft Forge
- * Copyright (c) 2016.
+ * Copyright (c) 2016-2020.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@
 
 package net.minecraftforge.fml.common.network.handshake;
 
-import catserver.server.CatServer;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -92,7 +91,7 @@ enum FMLHandshakeServerState implements IHandshakeState<FMLHandshakeServerState>
                 while (itr.hasNext())
                 {
                     Entry<ResourceLocation, ForgeRegistry.Snapshot> e = itr.next();
-                    if ("minecraft:dataserializers".equals(e.getKey().toString()) && !CatServer.isSendDataSerializers(ctx.channel().attr(NetworkDispatcher.FML_DISPATCHER).get().getModList())) continue; // CatServe
+                    if ("minecraft:dataserializers".equals(e.getKey().toString()) && !catserver.server.CatServerNetwork.isSendDataSerializers(ctx.channel().attr(NetworkDispatcher.FML_DISPATCHER).get().getModList())) continue; // CatServe
                     ctx.writeAndFlush(new FMLHandshakeMessage.RegistryData(itr.hasNext(), e.getKey(), e.getValue())).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 }
             }

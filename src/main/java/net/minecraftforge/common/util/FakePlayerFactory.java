@@ -1,6 +1,6 @@
 /*
  * Minecraft Forge
- * Copyright (c) 2016.
+ * Copyright (c) 2016-2020.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,8 @@ import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.world.WorldServer;
+
+import catserver.api.bukkit.event.FakePlayerJoinEvent;
 
 //To be expanded for generic Mod fake players?
 public class FakePlayerFactory
@@ -75,6 +77,7 @@ public class FakePlayerFactory
             username = new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + username.getName()).getBytes(StandardCharsets.UTF_8)), username.getName()); // Create new GameProfile with offline UUID
         }
         fakePlayers.put(username, fakePlayer);
+        world.getServer().getPluginManager().callEvent(new FakePlayerJoinEvent(fakePlayer.getBukkitEntity(), world.getWorld()));
 
         return fakePlayers.get(username);
     }

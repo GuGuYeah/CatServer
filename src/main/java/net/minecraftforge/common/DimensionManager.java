@@ -1,6 +1,6 @@
 /*
  * Minecraft Forge
- * Copyright (c) 2016.
+ * Copyright (c) 2016-2020.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -154,7 +154,7 @@ public class DimensionManager
             usedIds.add(id);
         }
         // CatServer - register Environment to Bukkit
-        if (id != -1 && id != 0 && id != 1) // ignore vanilla
+        if (id < -1 || id > 1) // ignore vanilla
         {
             registerBukkitDimension(id, type.getName());
         }
@@ -278,34 +278,25 @@ public class DimensionManager
         }
         catch (Exception e)
         {
-            FMLLog.log.error("Cannot Hotload Dim: {}", dim); // CatServer - no output exception
+            FMLLog.log.error("Cannot Hotload Dim: {}", dim, e);
             return; // If a provider hasn't been registered then we can't hotload the dim
         }
         MinecraftServer mcServer = overworld.getMinecraftServer();
         ISaveHandler savehandler = overworld.getSaveHandler();
         WorldSettings worldSettings = new WorldSettings(overworld.getWorldInfo());
-        String worldType;
-        String name;
         Environment env = Environment.getEnvironment(dim);
         if (dim >= -1 && dim <= 1)
         {
             if ((dim == -1 && !mcServer.getAllowNether()) || (dim == 1 && !mcServer.server.getAllowEnd()))
                 return;
-            worldType = env.toString().toLowerCase();
-            name = "DIM" + dim;
         } else {
-            WorldProvider provider = WorldProvider.getProviderForDimension(dim);
-            worldType = provider.getClass().getSimpleName().toLowerCase();
-            worldType = worldType.replace("worldprovider", "");
-            worldType = worldType.replace("provider", "");
-
-            if(Environment.getEnvironment(DimensionManager.getProviderType(dim).getId()) == null){
-                env = DimensionManager.registerBukkitDimension(DimensionManager.getProviderType(dim).getId(), worldType);
+            DimensionType type = DimensionManager.getProviderType(dim);
+            if(Environment.getEnvironment(type.getId()) == null) {
+                env = DimensionManager.registerBukkitDimension(type.getId(), type.getName());
             }
-
-            name = provider.getSaveFolder();
         }
 
+        String name = "DIM" + dim;
         ChunkGenerator gen = mcServer.server.getGenerator(name);
         if (mcServer instanceof DedicatedServer) {
             worldSettings.setGeneratorOptions(((DedicatedServer) mcServer).getStringProperty("generator-settings", ""));
@@ -583,6 +574,21 @@ public class DimensionManager
             registerDimension(dim, type);
             addBukkitDimension(dim);
         }
+
+        if (env == null) {
+            try {
+                env = Environment.getEnvironment(DimensionManager.createProviderFor(dim).getDimension());
+            }
+            catch (Exception e)
+            {
+                // do nothing
+            }
+
+            if (env == null) {
+                env = Environment.NORMAL;
+            }
+        }
+
         ChunkGenerator gen = creator.generator();
         if (mcServer instanceof DedicatedServer) {
             worldSettings.setGeneratorOptions(((DedicatedServer) mcServer).getStringProperty("generator-settings", ""));
@@ -613,9 +619,9 @@ public class DimensionManager
 
     public static Environment registerBukkitDimension(int dim, String worldType) {
         Environment env = Environment.getEnvironment(dim);
-        if(env == null){
-            worldType = worldType.replace("WorldProvider","");
-            env = EnumHelper.addBukkitEnvironment(dim,worldType.toUpperCase());
+        if(env == null) {
+            worldType = worldType.replace("WorldProvider", "");
+            env = EnumHelper.addBukkitEnvironment(dim, worldType.toUpperCase());
             Environment.registerEnvironment(env);
         }
         return env;
